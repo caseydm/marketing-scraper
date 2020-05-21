@@ -1,4 +1,5 @@
 import os
+import time
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -26,6 +27,18 @@ def main():
         save_result(result)
 
 
+def url_already_tested(url):
+    session = Session()
+    return session.query(TestedURLs.id).filter_by(url=url).scalar()
+
+
+def save_tested_url(url):
+    session = Session()
+    new_url = TestedURLs(url=url)
+    session.add(new_url)
+    session.commit()
+
+
 def try_admin_dashboard(url):
     session = HTMLSession()
     r = session.get(url + '/admin')
@@ -33,9 +46,10 @@ def try_admin_dashboard(url):
         html = r.html.html
         if is_django(html) or is_wagtail(html):
             result = {
-                'url': url,
                 'is_django': is_django(html),
-                'is_wagtail': is_wagtail(html)
+                'is_wagtail': is_wagtail(html),
+                'title_text': get_title_text(url),
+                'url': url
             }
             return result
 
@@ -48,24 +62,19 @@ def is_wagtail(html):
     return 'Wagtail' in html
 
 
-def url_already_tested(url):
-    session = Session()
-    return session.query(TestedURLs.id).filter_by(url=url).scalar()
+def get_title_text(url):
+    time.sleep(1)
+    session = HTMLSession()
+    r = session.get(url)
+    return r.html.find('title', first=True).text
 
 
 def save_result(result):
     if result:
         session = Session()
-        new_success = Success(url=result['url'], is_django=result['is_django'], is_wagtail=result['is_wagtail'])
+        new_success = Success(**result)
         session.add(new_success)
         session.commit()
-
-
-def save_tested_url(url):
-    session = Session()
-    new_url = TestedURLs(url=url)
-    session.add(new_url)
-    session.commit()
 
 
 if __name__ == '__main__':
