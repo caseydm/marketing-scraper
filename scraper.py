@@ -15,7 +15,7 @@ engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
 
-def main():
+def main(event, context):
     """
     Primary function that checks a website to determine if it is Django or Wagtail.
     """
@@ -97,4 +97,4 @@ def save_result(result):
 
 
 if __name__ == '__main__':
-    main()
+    main("", "")

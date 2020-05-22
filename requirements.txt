@@ -8,7 +8,7 @@ fake-useragent==0.1.11
 idna==2.9
 lxml==4.5.1
 parse==1.15.0
-psycopg2==2.8.5
+psycopg2-binary==2.8.5
 pyee==7.0.2
 pyppeteer==0.2.2
 pyquery==1.4.1
