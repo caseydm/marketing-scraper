@@ -1,10 +1,11 @@
 import os
+import random
 import time
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from requests_html import HTMLSession
-from models import Base, TestedURLs, Success
+from models import Base, Success, TestedURLs, URLsToTest
 
 # app config
 DATABASE_URL = os.environ.get('DATABASE_URL')
@@ -19,12 +20,30 @@ def main():
     Primary function that checks a website to determine if it is Django or Wagtail.
     """
     Base.metadata.create_all(engine)
-    url = 'https://www.liveonny.org/'
+    url = get_random_url()
 
-    if not url_already_tested(url):
+    if url and not url_already_tested(url):
         save_tested_url(url)
         result = try_admin_dashboard(url)
         save_result(result)
+
+
+def get_random_url():
+    session = Session()
+    urls = session.query(URLsToTest).filter(URLsToTest.tested!=True).all()
+
+    if urls:
+        url = random.choice(urls)
+
+        # save as tested
+        url.tested = True
+        session.commit()
+
+        result = url.url
+    else:
+        result = None
+
+    return result
 
 
 def url_already_tested(url):
