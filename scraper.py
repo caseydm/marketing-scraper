@@ -21,6 +21,7 @@ def main(event, context):
     """
     Base.metadata.create_all(engine)
     url = get_random_url()
+    print(url)
 
     if url and not url_already_tested(url):
         save_tested_url(url)
@@ -70,6 +71,7 @@ def try_admin_dashboard(url):
                 'title_text': get_title_text(url),
                 'url': url
             }
+            print(result)
             return result
 
 
