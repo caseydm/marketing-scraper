@@ -61,7 +61,7 @@ def save_tested_url(url):
 
 def try_admin_dashboard(url):
     session = HTMLSession()
-    r = session.get(url + '/admin')
+    r = session.get(url + '/admin', timeout=5)
     if r.status_code == 200:
         html = r.html.html
         if is_django(html) or is_wagtail(html):
@@ -86,7 +86,7 @@ def is_wagtail(html):
 def get_title_text(url):
     time.sleep(1)
     session = HTMLSession()
-    r = session.get(url)
+    r = session.get(url, timeout=5)
     return r.html.find('title', first=True).text
 
 
