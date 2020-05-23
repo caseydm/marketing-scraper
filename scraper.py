@@ -25,7 +25,6 @@ def main(event, context):
 
     for url in urls:
         if url and not url_already_tested(url):
-            url = format_as_url(url)
             save_tested_url(url)
             result = try_admin_dashboard(url)
             save_result(result)
@@ -36,14 +35,14 @@ def get_random_urls():
     urls = session.query(URLsToTest).filter(URLsToTest.tested==None).all()
 
     if urls:
-        urls = random.choices(urls, k=10)
+        urls = random.choices(urls, k=20)
 
         # save as tested
         for url in urls:
             url.tested = True
         session.commit()
 
-        result = [url.url for url in urls]
+        result = [format_as_url(url.url) for url in urls]
     else:
         result = None
 
@@ -64,18 +63,21 @@ def save_tested_url(url):
 
 def try_admin_dashboard(url):
     session = HTMLSession()
-    r = session.get(url + '/admin', timeout=5)
-    if r.status_code == 200:
-        html = r.html.html
-        if is_django(html) or is_wagtail(html):
-            result = {
-                'is_django': is_django(html),
-                'is_wagtail': is_wagtail(html),
-                'title_text': get_title_text(url),
-                'url': url
-            }
-            print(result)
-            return result
+    try:
+        r = session.get(url + '/admin', timeout=3)
+        if r.status_code == 200:
+            html = r.html.html
+            if is_django(html) or is_wagtail(html):
+                result = {
+                    'is_django': is_django(html),
+                    'is_wagtail': is_wagtail(html),
+                    'title_text': get_title_text(url),
+                    'url': url
+                }
+                print(result)
+                return result
+    except:
+        pass
 
 
 def is_django(html):
@@ -89,7 +91,7 @@ def is_wagtail(html):
 def get_title_text(url):
     time.sleep(1)
     session = HTMLSession()
-    r = session.get(url, timeout=5)
+    r = session.get(url, timeout=3)
     return r.html.find('title', first=True).text
 
 
@@ -105,6 +107,7 @@ def format_as_url(url):
     if 'http://' not in url:
         url = 'http://' + url
     return url
+
 
 if __name__ == '__main__':
     main("", "")
