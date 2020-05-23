@@ -31,7 +31,7 @@ def main(event, context):
 
 def get_random_url():
     session = Session()
-    urls = session.query(URLsToTest).filter(URLsToTest.tested!=True).all()
+    urls = session.query(URLsToTest).filter(URLsToTest.tested==None).all()
 
     if urls:
         url = random.choice(urls)
