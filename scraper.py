@@ -20,27 +20,30 @@ def main(event, context):
     Primary function that checks a website to determine if it is Django or Wagtail.
     """
     Base.metadata.create_all(engine)
-    url = get_random_url()
-    print(url)
+    urls = get_random_urls()
+    print(urls)
 
-    if url and not url_already_tested(url):
-        save_tested_url(url)
-        result = try_admin_dashboard(url)
-        save_result(result)
+    for url in urls:
+        if url and not url_already_tested(url):
+            url = format_as_url(url)
+            save_tested_url(url)
+            result = try_admin_dashboard(url)
+            save_result(result)
 
 
-def get_random_url():
+def get_random_urls():
     session = Session()
     urls = session.query(URLsToTest).filter(URLsToTest.tested==None).all()
 
     if urls:
-        url = random.choice(urls)
+        urls = random.choices(urls, k=10)
 
         # save as tested
-        url.tested = True
+        for url in urls:
+            url.tested = True
         session.commit()
 
-        result = url.url
+        result = [url.url for url in urls]
     else:
         result = None
 
@@ -97,6 +100,11 @@ def save_result(result):
         session.add(new_success)
         session.commit()
 
+
+def format_as_url(url):
+    if 'http://' not in url:
+        url = 'http://' + url
+    return url
 
 if __name__ == '__main__':
     main("", "")
