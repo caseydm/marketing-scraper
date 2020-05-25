@@ -23,11 +23,12 @@ def main(event, context):
     urls = get_random_urls()
     print(urls)
 
-    for url in urls:
-        if url and not url_already_tested(url):
-            save_tested_url(url)
-            result = try_admin_dashboard(url)
-            save_result(result)
+    if urls:
+        for url in urls:
+            if url and not url_already_tested(url):
+                save_tested_url(url)
+                result = try_admin_dashboard(url)
+                save_result(result)
 
 
 def get_random_urls():
